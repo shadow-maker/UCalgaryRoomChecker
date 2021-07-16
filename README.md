@@ -1,1 +1,1 @@
-UCalgaryRoomChecker
+# University of Calgary Room Checker

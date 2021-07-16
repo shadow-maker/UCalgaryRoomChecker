@@ -1,3 +1,15 @@
+# SECRET
+secret.py
+
+# Logs
+log.csv
+log.json
+snapshots/
+
+# Mac
+
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
