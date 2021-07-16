@@ -136,13 +136,15 @@ class RoomChecker():
 			# Close pop-up
 
 			WebDriverWait(self.br, 20).until(EC.number_of_windows_to_be(2))
-			allWin = self.br.window_handles
-			self.br.switch_to.window([x for x in allWin if x != parentWindow][0])
+			mainWin = [x for x in self.br.window_handles if x != parentWindow][0]
+			self.br.switch_to.window(mainWin)
 			self.br.close()
-			self.br.switch_to.window(allWin[0])
+			self.br.switch_to.window(self.br.window_handles[0])
 		
 		try: # Wait for page to finish loading
-			element_present = EC.presence_of_element_located((By.LINK_TEXT, "Room Change"))
+			element_present = EC.presence_of_element_located(
+				(By.LINK_TEXT, "Room Change")
+			)
 			WebDriverWait(self.br, self.timeout).until(element_present)
 		except TimeoutException:
 			print("Loading took too much time!")
@@ -161,7 +163,9 @@ class RoomChecker():
 		dtChecked = datetime.now()
 
 		try: # Wait for page to finish loading
-			element_present = EC.presence_of_element_located((By.CLASS_NAME, "px_initialfilterstep_page"))
+			element_present = EC.presence_of_element_located(
+				(By.CLASS_NAME, "px_initialfilterstep_page")
+			)
 			WebDriverWait(self.br, self.timeout).until(element_present)
 		except TimeoutException:
 			print("Loading took too much time!")
@@ -196,7 +200,9 @@ class RoomChecker():
 				self.br.execute_script("arguments[0].click();", button)
 
 				try: # Wait for page to finish loading
-					element_present = EC.presence_of_element_located((By.CLASS_NAME, "results-list"))
+					element_present = EC.presence_of_element_located(
+						(By.CLASS_NAME, "results-list")
+					)
 					WebDriverWait(self.br, self.timeout).until(element_present)
 				except TimeoutException:
 					print("Loading took too much time!")
@@ -215,7 +221,8 @@ class RoomChecker():
 				self.br.get(infoLink.get_attribute("href"))
 
 				table = self.br.find_element_by_class_name("ui-active-table")
-				tableRows = table.find_element_by_tag_name("tbody").find_elements_by_xpath("./*")
+				tableBody = table.find_element_by_tag_name("tbody")
+				tableRows = tableBody.find_elements_by_xpath("./*")
 
 				# Get info of each occupant of the room
 				occupants = []
