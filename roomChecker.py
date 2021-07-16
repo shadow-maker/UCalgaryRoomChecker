@@ -20,12 +20,13 @@ import time
 #
 
 class RoomChecker():
+
 	#
-	# TIME VARS
+	# URLS
 	#
 
-	timeout = 30
-	sleepInterval = 300
+	loginURL = "https://cas.ucalgary.ca/cas/?service=https%3a%2f%2fucalgary.starrezhousing.com%2fStarRezPortalX%2fRedirectLogin%2fStarNet.StarRez.AuthProviders.CasSso"
+	iftttPostURL = "https://maker.ifttt.com/trigger/room_available/with/key/"
 
 	#
 	# BOOLS
@@ -45,18 +46,18 @@ class RoomChecker():
 	snapshotDir = "snapshots"
 
 	#
-	# URLS
+	# TIME VARS
 	#
 
-	loginURL = "https://cas.ucalgary.ca/cas/?service=https%3a%2f%2fucalgary.starrezhousing.com%2fStarRezPortalX%2fRedirectLogin%2fStarNet.StarRez.AuthProviders.CasSso"
-	iftttPostURL = "https://maker.ifttt.com/trigger/room_available/with/key/"
+	timeout = 30
+	sleepInterval = 300
 
 	#
 	# Init
 	#
 
 	def __init__(self, user, pssw, iftttKey="", checkPeriodically=False):
-		self.br = webdriver.safari.webdriver.WebDriver(quiet=True)
+		self.br = webdriver.safari.webdriver.WebDriver()
 		self.user = user
 		self.pssw = pssw
 		self.iftttKey = iftttKey
