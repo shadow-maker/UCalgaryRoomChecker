@@ -31,7 +31,7 @@ class RoomChecker():
 	# BOOLS
 	#
 
-	notify = True
+	iftttPost = True
 	logToCSV = True
 	logToJson = True
 	saveSnapshot = True
@@ -67,7 +67,7 @@ class RoomChecker():
 	#
 
 	def postIFTTT(self, roomsAvailable, uniqueHalls, dtChecked):
-		if self.notify and self.iftttKey != "":
+		if self.iftttPost and self.iftttKey != "":
 			requests.post(self.iftttPostURL + self.iftttKey,
 				{
 					"value1": roomsAvailable,
@@ -258,10 +258,11 @@ class RoomChecker():
 		self.logCSV(dtChecked, len(roomsAvailable)) # Save CSV log
 		self.snapshot(html, dtChecked) # Save HTML snapshot
 
+		if self.checkPeriodically:
+			time.sleep(self.sleepInterval) # Sleep
+			self.checkForRooms() # Recursive
+
 
 	def begin(self):
 		self.logIn()
 		self.checkForRooms()
-		if self.checkPeriodically:
-			time.sleep(self.sleepInterval) # Sleep
-			self.checkForRooms() # Recursive
