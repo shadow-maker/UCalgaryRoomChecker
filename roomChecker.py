@@ -67,17 +67,6 @@ class RoomChecker():
 	# LOG
 	#
 
-	def postIFTTT(self, roomsAvailable, uniqueHalls, dtChecked):
-		if self.iftttPost and self.iftttKey != "":
-			requests.post(self.iftttPostURL + self.iftttKey,
-				{
-					"value1": roomsAvailable,
-					"value2": ", ".join(uniqueHalls),
-					"value3": dtChecked.strftime("%Y-%m-%d %H:%M")
-				}
-			)
-
-
 	def logCSV(self, dtChecked, roomsAvailable):
 		if self.logToCSV:
 			with open(self.csvFileName, "a") as file:
@@ -110,7 +99,7 @@ class RoomChecker():
 				file.write(json.dumps(log))
 
 
-	def snapshot(self, html, dtChecked):
+	def snapshot(self, dtChecked, html):
 		if self.saveSnapshot:
 			snapDir = f"{self.snapshotDir}/{dtChecked.strftime('%Y-%m-%d')}/{dtChecked.strftime('%H')}"
 		
@@ -119,6 +108,17 @@ class RoomChecker():
 
 		with open(snapDir + f"/{dtChecked.strftime('%M')}.html", "w") as file:
 			file.write(html)
+	
+
+	def postIFTTT(self, dtChecked, roomsAvailable, uniqueHalls):
+		if self.iftttPost and self.iftttKey != "":
+			requests.post(self.iftttPostURL + self.iftttKey,
+				{
+					"value1": roomsAvailable,
+					"value2": ", ".join(uniqueHalls),
+					"value3": dtChecked.strftime("%Y-%m-%d %H:%M")
+				}
+			)
 	
 	#
 	# MAIN FUNCS
@@ -251,13 +251,13 @@ class RoomChecker():
 
 				self.navigateToPage()
 
-			self.postIFTTT(len(roomsAvailable), uniqueHalls, dtChecked) # Post to IFTTT
+			self.postIFTTT(dtChecked, len(roomsAvailable), uniqueHalls) # Post to IFTTT
 			self.logJSON(dtChecked, roomsData) # Save JSON log
 		except NoSuchElementException: # Rooms are not available
 			print(f"{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet")
 
 		self.logCSV(dtChecked, len(roomsAvailable)) # Save CSV log
-		self.snapshot(html, dtChecked) # Save HTML snapshot
+		self.snapshot(dtChecked, html) # Save HTML snapshot
 
 		if self.checkPeriodically:
 			time.sleep(self.sleepInterval) # Sleep
