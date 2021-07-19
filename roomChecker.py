@@ -267,7 +267,7 @@ class RoomChecker():
 					gender = row.find_element_by_class_name("genderenum").text
 					age = row.find_element_by_class_name("age").text
 					print((" " * 21) + f"> {bed} - {name} - {gender} - {age}y")
-					age = age if name == "Vacant" else int(age)
+					age = 0 if name == "Vacant" else int(age)
 					occupants.append({
 						"bed": bed,
 						"name": name,
