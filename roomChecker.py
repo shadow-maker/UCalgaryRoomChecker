@@ -10,9 +10,11 @@ except ModuleNotFoundError:
 	print("Please run the 'pip install selenium' command")
 
 from datetime import datetime
+from math import log10
 import json
 import os
 import requests
+import sys
 import time
 
 #
@@ -124,7 +126,33 @@ class RoomChecker():
 	# MAIN FUNCS
 	#
 
-	def logIn(self):
+	def sleep(self): # Sleep until next room check
+		width = os.get_terminal_size().columns - 6 # Width of progress bar
+		timePerChar = self.sleepInterval / width
+		loadStates = ["\\", "|", "/", "-"]
+
+		for i in range(width): # Loop width of progress bar
+			for s in range(len(loadStates)): # Loop loading chars
+				timeLeft = (self.sleepInterval - (timePerChar * (i + ((s + 1) / len(loadStates))))) + 0.01
+
+				# Formar timeLeft so that its always 3 chars long
+				timeDigs = int(log10(timeLeft)) + 1
+				timeFormat = str(round(timeLeft, 1) if timeDigs < 2 else (round(timeLeft) if timeDigs < 4 else 999)).zfill(3)
+
+				# Output progress bar
+				sys.stdout.write(f"\r[{('-' * i)}{loadStates[s]}{' ' * (width - i - 1)}]{timeFormat}s")
+				sys.stdout.flush()
+
+				# Sleep time per state per char in progress bar
+				time.sleep(timePerChar / len(loadStates))
+
+		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns)) # Clean
+
+
+	def logIn(self): # Log-in with user's credentials
+		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+		sys.stdout.write("\r>LOGGING IN...")
+		sys.stdout.flush()
 		self.br.get(self.loginURL) # Navigate to page, will redirect if already logged in
 		if self.br.current_url == self.loginURL: # If login is required, login
 			self.br.find_element_by_id("eidtext").send_keys(self.user)
@@ -148,7 +176,7 @@ class RoomChecker():
 			)
 			WebDriverWait(self.br, self.timeout).until(element_present)
 		except TimeoutException:
-			print("Loading took too much time!")
+			print(">Loading took too much time!")
 
 
 	def navigateToPage(self): # Navigate to room change page
@@ -169,23 +197,29 @@ class RoomChecker():
 			)
 			WebDriverWait(self.br, self.timeout).until(element_present)
 		except TimeoutException:
-			print("Loading took too much time!")
+			print(">Loading took too much time!")
 		
 		return dtChecked
 
 
-	def checkForRooms(self):
+	def checkForRooms(self): # Check for available rooms
+		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+		sys.stdout.write("\r>CHECKING FOR ROOMS...")
+		sys.stdout.flush()
 		dtChecked = self.navigateToPage() # navigate to change rooms page and return dt checked
 		html = self.br.page_source
+
+		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
 		
 		roomsAvailable = []
 
 		try: # IF Rooms are available
 			roomContainer = self.br.find_element_by_class_name("responsive-flow")
 			roomsAvailable = roomContainer.find_elements_by_xpath("./*")
-			print(
-				f"{dtChecked.strftime('%Y-%m-%d %H:%M')} - {len(roomsAvailable)} ROOM(S) AVAILABLE:"
+			sys.stdout.write(
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - {len(roomsAvailable)} ROOM(S) AVAILABLE:\n"
 			)
+			sys.stdout.flush()
 
 			uniqueHalls = []
 			roomsData = []
@@ -206,7 +240,7 @@ class RoomChecker():
 					)
 					WebDriverWait(self.br, self.timeout).until(element_present)
 				except TimeoutException:
-					print("Loading took too much time!")
+					print(">Loading took too much time!")
 				
 				resContainer = self.br.find_element_by_class_name("results-list")
 				result = resContainer.find_element_by_xpath("./*")
@@ -254,13 +288,17 @@ class RoomChecker():
 			self.postIFTTT(dtChecked, len(roomsAvailable), uniqueHalls) # Post to IFTTT
 			self.logJSON(dtChecked, roomsData) # Save JSON log
 		except NoSuchElementException: # Rooms are not available
-			print(f"{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet")
+			sys.stdout.write(
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet\n"
+			)
+			sys.stdout.flush()
 
 		self.logCSV(dtChecked, len(roomsAvailable)) # Save CSV log
 		self.snapshot(dtChecked, html) # Save HTML snapshot
 
 		if self.checkPeriodically:
-			time.sleep(self.sleepInterval) # Sleep
+			print()
+			self.sleep() # Sleep
 			self.checkForRooms() # Recursive
 
 
