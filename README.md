@@ -49,7 +49,7 @@ A Python script that scrapes the UCalgary residence portal to check if new rooms
     * By now blank browser window should have opened up
     * Run `rc.begin()` to begin checking for rooms
 
-## [Class specifications / documentation]("specs.md")
+## [Class specifications / documentation](specs.md)
 
 ## IFTTT Integration
 ...
