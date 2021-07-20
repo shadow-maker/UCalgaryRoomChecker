@@ -234,14 +234,16 @@ class RoomChecker():
 			uniqueHalls = []
 			roomsData = []
 
+			sys.stdout.write(
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - AVAILABLE ROOM(S) FOUND IN {len(hallsList)} HALLS:\n"
+				)
+			sys.stdout.flush()
+
 			for h in range(len(hallsList)): # Get info of each room available
 				hallsContainer = self.br.find_element_by_class_name("responsive-flow")
 				hall = hallsContainer.find_elements_by_xpath("./*")[h]
 				hallName = hall.find_element_by_class_name("title").text
 				uniqueHalls.append(hallName)
-
-				sys.stdout.write(f"\rChecking for rooms in {hallName}...")
-				sys.stdout.flush()
 
 				# Go to results info page
 				button = hall.find_element_by_class_name("ui-select-action")
@@ -273,7 +275,7 @@ class RoomChecker():
 						roomNums.append(roomNum)
 						roomsCount += 1
 						sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
-						sys.stdout.write(f"\r{len(roomNums)} rooms found in in {hallName}...")
+						sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) FOUND IN {hallName.upper()}...")
 						sys.stdout.flush()
 
 					wing = room.find_element_by_class_name("multiline").text.split("\n")[0]
@@ -324,19 +326,20 @@ class RoomChecker():
 							WebDriverWait(self.br, self.timeout).until(element_present)
 						except TimeoutException:
 							print(">Loading took too much time!")
+				
+				sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+				sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) AVAILABLE IN {hallName.upper()}:\n")
+				sys.stdout.flush()
+
+				for room in roomsData:
+					if room['hall'] == hallName:
+						print(f"{(' ' * 21)}> {room['roomNumber']} - {room['wing']} - {room['capacity']} beds")
+
+						for occupant in room['ocuppants']:
+							info = "AVAILABLE" if occupant['name'] == "Vacant" else f"{occupant['name']} - {occupant['gender']} - {occupant['age']}y"
+							print(f"{(' ' * 23)}* {occupant['bed']} - {info}")
 
 				self.navigateToPage()
-				
-			sys.stdout.write(
-				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - {roomsCount} ROOM(S) AVAILABLE:\n"
-				)
-			sys.stdout.flush()
-
-			for room in roomsData:
-				print((" " * 19) + f"+ {room['hall']} - {room['roomNumber']} - {room['wing']} - {room['capacity']} beds")
-
-				for occupant in room['ocuppants']:
-					print((" " * 21) + f"> {occupant['bed']} - {occupant['name']} - {occupant['gender']} - {occupant['age']}y")
 
 			self.postIFTTT(dtChecked, roomsData, uniqueHalls) # Post to IFTTT
 			self.postNotification(dtChecked, roomsData, uniqueHalls)
