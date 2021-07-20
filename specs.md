@@ -131,12 +131,16 @@
 * `navigateToPage`
   * Parameters:
   * **Navigates to the room change page**
+* `getRoomsData`
+  * Parameters: `dtChecked` (`datetime.datetime`)
+  * **Scrapes the data of the rooms available from the needed sub-websites**
+  * **Prints the found rooms info**
+  * **Returns the `roomsData` and `uniqueHalls` found**
 * `checkForRooms`
   * Parameters:
-  * Runs `navigateToPage` and checks if rooms are shown available
-  * **If available, scrapes the data from the needed sub-websites**
-  * **Prints the general rooms info**
-  * **Runs the necessary methods to log the general rooms info to CSV and JSON, save an HTML snapshot of the change rooms page, and make a post to the IFTTT service**
+  * **Runs `navigateToPage` and checks if rooms are shown available**
+  * **If available, runs `getRoomsData`**
+  * **Runs the necessary methods to log the general rooms info to CSV and JSON, save an HTML snapshot of the change rooms page, make a post to the IFTTT service and create a Mac Notification**
   * **Runs `sleep` and runs itself recursively if `checkPeriodically` is `True`**
 * `begin`
   * Parameters:

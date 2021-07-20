@@ -191,9 +191,6 @@ class RoomChecker():
 
 
 	def navigateToPage(self): # Navigate to room change page
-		#preURL = self.br.current_url
-		#self.br.refresh()
-		
 		link = self.br.find_element_by_link_text("Room Change")
 		self.br.get(link.get_attribute("href"))
 
@@ -205,6 +202,104 @@ class RoomChecker():
 		self.waitForPageLoad("px_initialfilterstep_page")
 		
 		return dtChecked
+	
+
+	def getRoomsData(self, dtChecked): # Gets the data of every room available
+		roomsData = []
+		uniqueHalls = []
+
+		hallsCount = len(self.br.find_elements_by_class_name("responsive-flow>*"))
+
+		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+		sys.stdout.write(
+			f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - AVAILABLE ROOM(S) FOUND IN {hallsCount} HALLS:\n"
+			)
+		sys.stdout.flush()
+
+		for h in range(hallsCount): # Get info of each room available
+			hall = self.br.find_elements_by_class_name("responsive-flow>*")[h]
+			hallName = hall.find_element_by_class_name("title").text
+			uniqueHalls.append(hallName)
+
+			# Go to results info page
+			button = hall.find_element_by_class_name("ui-select-action")
+			self.br.execute_script("arguments[0].click();", button)
+
+			self.waitForPageLoad("results-list")
+
+			roomItems = len(self.br.find_elements_by_class_name("item-result"))
+
+			roomNums = []
+			for r in range(roomItems):
+				room = self.br.find_elements_by_class_name("item-result")[r]
+
+				if "dummy-item-result" in room.get_attribute("class"):
+					continue
+
+				temp = room.find_element_by_class_name("title").text.split("-")
+				roomNum = temp[0] + "-" + temp[1][:3]
+
+				if roomNum in roomNums:
+					continue
+				else:
+					roomNums.append(roomNum)
+					sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+					sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) FOUND IN {hallName.upper()}...")
+					sys.stdout.flush()
+
+				wing = room.find_element_by_class_name("multiline").text.split("\n")[0]
+				capacity = room.find_element_by_class_name("capacity").text.replace("\n", "").replace("\t", "").replace(" ", "")
+
+				# Go to room info page
+				infoLink = room.find_element_by_link_text("Show Room Info")
+				self.br.get(infoLink.get_attribute("href"))
+
+				# Get info of each occupant of the room
+				occupants = []
+				for row in self.br.find_elements_by_class_name("ui-activetablerow"):
+					bed = row.find_element_by_class_name("roomspacedescription").text
+					name = row.find_element_by_class_name("nameweb").text.replace("-","")
+					gender = row.find_element_by_class_name("genderenum").text
+					age = row.find_element_by_class_name("age").text
+					age = 0 if name == "Vacant" else int(age)
+					occupants.append({
+						"bed": bed,
+						"name": name,
+						"gender": gender,
+						"age": age
+					})
+
+				roomsData.append({
+					"hall": hallName,
+					"wing": wing,
+					"roomNumber": roomNum,
+					"capacity": int(capacity),
+					"ocuppants": occupants
+				})
+
+				if r < roomItems - 1:
+					self.navigateToPage()
+					hall = self.br.find_elements_by_class_name("responsive-flow>*")[h]
+					button = hall.find_element_by_class_name("ui-select-action")
+					self.br.execute_script("arguments[0].click();", button)
+
+					self.waitForPageLoad("results-list")
+			
+			sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+			sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) AVAILABLE IN {hallName.upper()}:\n")
+			sys.stdout.flush()
+
+			for room in roomsData: # Print rooms found in hall
+				if room['hall'] == hallName:
+					print(f"{(' ' * 21)}> {room['roomNumber']} - {room['wing']} - {room['capacity']} beds")
+
+					for occupant in room['ocuppants']:
+						info = "AVAILABLE" if occupant['name'] == "Vacant" else f"{occupant['name']} - {occupant['gender']} - {occupant['age']}y"
+						print(f"{(' ' * 23)}* {occupant['bed']} - {info}")
+
+			self.navigateToPage()
+
+		return roomsData, uniqueHalls
 
 
 	def checkForRooms(self): # Check for available rooms
@@ -217,122 +312,21 @@ class RoomChecker():
 		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
 		
 		try: # IF Rooms are available
-			hallsContainer = self.br.find_element_by_class_name("responsive-flow")
-			hallsList = hallsContainer.find_elements_by_xpath("./*")
-			roomsAvailable = True
-		except NoSuchElementException: # Rooms are not available
-			roomsAvailable = False
-			sys.stdout.write(
-				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet\n"
-			)
-			sys.stdout.flush()
-		
-		roomsCount = 0
-		if roomsAvailable:
-			uniqueHalls = []
-			roomsData = []
+			element = self.br.find_element_by_class_name("responsive-flow")
 
-			sys.stdout.write(
-				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - AVAILABLE ROOM(S) FOUND IN {len(hallsList)} HALLS:\n"
-				)
-			sys.stdout.flush()
-
-			for h in range(len(hallsList)): # Get info of each room available
-				hallsContainer = self.br.find_element_by_class_name("responsive-flow")
-				hall = hallsContainer.find_elements_by_xpath("./*")[h]
-				hallName = hall.find_element_by_class_name("title").text
-				uniqueHalls.append(hallName)
-
-				# Go to results info page
-				button = hall.find_element_by_class_name("ui-select-action")
-				self.br.execute_script("arguments[0].click();", button)
-
-				self.waitForPageLoad("results-list")
-
-				roomsList = self.br.find_elements_by_class_name("item-result")
-
-				roomNums = []
-				for r in range(len(roomsList)):
-					room = self.br.find_elements_by_class_name("item-result")[r]
-
-					if "dummy-item-result" in room.get_attribute("class"):
-						continue
-
-					temp = room.find_element_by_class_name("title").text.split("-")
-					roomNum = temp[0] + "-" + temp[1][:3]
-
-					if roomNum in roomNums:
-						continue
-					else:
-						roomNums.append(roomNum)
-						roomsCount += 1
-						sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
-						sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) FOUND IN {hallName.upper()}...")
-						sys.stdout.flush()
-
-					wing = room.find_element_by_class_name("multiline").text.split("\n")[0]
-					capacity = room.find_element_by_class_name("capacity").text.replace("\n", "").replace("\t", "").replace(" ", "")
-
-					# Go to room info page
-					infoLink = room.find_element_by_link_text("Show Room Info")
-					self.br.get(infoLink.get_attribute("href"))
-
-					table = self.br.find_element_by_class_name("ui-active-table")
-					tableBody = table.find_element_by_tag_name("tbody")
-					tableRows = tableBody.find_elements_by_xpath("./*")
-
-					# Get info of each occupant of the room
-					occupants = []
-					for row in tableRows:
-						bed = row.find_element_by_class_name("roomspacedescription").text
-						name = row.find_element_by_class_name("nameweb").text.replace("-","")
-						gender = row.find_element_by_class_name("genderenum").text
-						age = row.find_element_by_class_name("age").text
-						age = 0 if name == "Vacant" else int(age)
-						occupants.append({
-							"bed": bed,
-							"name": name,
-							"gender": gender,
-							"age": age
-						})
-
-					roomsData.append({
-						"hall": hallName,
-						"wing": wing,
-						"roomNumber": roomNum,
-						"capacity": int(capacity),
-						"ocuppants": occupants
-					})
-
-					if r < len(roomsList) - 1:
-						self.navigateToPage()
-						hallsContainer = self.br.find_element_by_class_name("responsive-flow")
-						hall = hallsContainer.find_elements_by_xpath("./*")[h]
-						button = hall.find_element_by_class_name("ui-select-action")
-						self.br.execute_script("arguments[0].click();", button)
-
-						self.waitForPageLoad("results-list")
-				
-				sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
-				sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) AVAILABLE IN {hallName.upper()}:\n")
-				sys.stdout.flush()
-
-				for room in roomsData:
-					if room['hall'] == hallName:
-						print(f"{(' ' * 21)}> {room['roomNumber']} - {room['wing']} - {room['capacity']} beds")
-
-						for occupant in room['ocuppants']:
-							info = "AVAILABLE" if occupant['name'] == "Vacant" else f"{occupant['name']} - {occupant['gender']} - {occupant['age']}y"
-							print(f"{(' ' * 23)}* {occupant['bed']} - {info}")
-
-				self.navigateToPage()
+			roomsData, uniqueHalls = self.getRoomsData(dtChecked)
 
 			self.postIFTTT(dtChecked, roomsData, uniqueHalls) # Post to IFTTT
 			self.postNotification(dtChecked, roomsData, uniqueHalls)
 			self.logJSON(dtChecked, roomsData) # Save JSON log
 			self.lastCheck = roomsData
+		except NoSuchElementException: # Rooms are not available
+			sys.stdout.write(
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet\n"
+			)
+			sys.stdout.flush()
 
-		self.logCSV(dtChecked, roomsCount) # Save CSV log
+		self.logCSV(dtChecked, len(roomsData)) # Save CSV log
 		self.snapshot(dtChecked, html) # Save HTML snapshot
 
 		if self.checkPeriodically:
