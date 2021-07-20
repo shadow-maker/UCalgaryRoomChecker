@@ -118,6 +118,9 @@
 
 ### Scraper methods
 
+* `waitForPageLoad`
+  * Parameters: `elementToCheck` (`str`), `by` (`str`)
+  * **Waits for the page to finish loading by waiting for a required element to be present in the page**
 * `sleep`
   * Parameters: 
   * **Sleeps `sleepInterval` seconds, showing the seconds left with a progress bar in the console**

@@ -133,6 +133,16 @@ class RoomChecker():
 	# MAIN FUNCS
 	#
 
+	def waitForPageLoad(self, elementToCheck, by=By.CLASS_NAME):
+		try: # Wait for page to finish loading
+			elementPresent = EC.presence_of_element_located((by, elementToCheck))
+			WebDriverWait(self.br, self.timeout).until(elementPresent)
+		except TimeoutException:
+			print(">Loading took too much time!")
+			return False
+		return True
+
+
 	def sleep(self): # Sleep until next room check
 		width = os.get_terminal_size().columns - 6 # Width of progress bar
 		timePerChar = self.sleepInterval / width
@@ -177,13 +187,7 @@ class RoomChecker():
 			self.br.close()
 			self.br.switch_to.window(self.br.window_handles[0])
 		
-		try: # Wait for page to finish loading
-			element_present = EC.presence_of_element_located(
-				(By.LINK_TEXT, "Room Change")
-			)
-			WebDriverWait(self.br, self.timeout).until(element_present)
-		except TimeoutException:
-			print(">Loading took too much time!")
+		self.waitForPageLoad("Room Change", By.LINK_TEXT)
 
 
 	def navigateToPage(self): # Navigate to room change page
@@ -198,13 +202,7 @@ class RoomChecker():
 		
 		dtChecked = datetime.now()
 
-		try: # Wait for page to finish loading
-			element_present = EC.presence_of_element_located(
-				(By.CLASS_NAME, "px_initialfilterstep_page")
-			)
-			WebDriverWait(self.br, self.timeout).until(element_present)
-		except TimeoutException:
-			print(">Loading took too much time!")
+		self.waitForPageLoad("px_initialfilterstep_page")
 		
 		return dtChecked
 
@@ -249,13 +247,7 @@ class RoomChecker():
 				button = hall.find_element_by_class_name("ui-select-action")
 				self.br.execute_script("arguments[0].click();", button)
 
-				try: # Wait for page to finish loading
-					element_present = EC.presence_of_element_located(
-						(By.CLASS_NAME, "results-list")
-					)
-					WebDriverWait(self.br, self.timeout).until(element_present)
-				except TimeoutException:
-					print(">Loading took too much time!")
+				self.waitForPageLoad("results-list")
 
 				roomsList = self.br.find_elements_by_class_name("item-result")
 
@@ -319,13 +311,7 @@ class RoomChecker():
 						button = hall.find_element_by_class_name("ui-select-action")
 						self.br.execute_script("arguments[0].click();", button)
 
-						try: # Wait for page to finish loading
-							element_present = EC.presence_of_element_located(
-								(By.CLASS_NAME, "results-list")
-							)
-							WebDriverWait(self.br, self.timeout).until(element_present)
-						except TimeoutException:
-							print(">Loading took too much time!")
+						self.waitForPageLoad("results-list")
 				
 				sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
 				sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) AVAILABLE IN {hallName.upper()}:\n")
