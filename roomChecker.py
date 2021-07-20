@@ -31,6 +31,7 @@ class RoomChecker():
 	#
 
 	loginURL = "https://cas.ucalgary.ca/cas/?service=https%3a%2f%2fucalgary.starrezhousing.com%2fStarRezPortalX%2fRedirectLogin%2fStarNet.StarRez.AuthProviders.CasSso"
+	errorPage = "https://ucalgary.starrezhousing.com/StarRezPortalX/Page/GetFirstPageWithReturnUrl?processID=22&returnUrl=%2FStarRezPortalX%2F3013DBBA%2F12%2F47%2FHome-Your_Resident_Portal%3FUrlToken%3D7A860693&isPageForContact=False&clearProcessContext=True&hash=003276C2"
 	iftttPostURL = "https://maker.ifttt.com/trigger/room_available/with/key/"
 
 	#
@@ -217,28 +218,33 @@ class RoomChecker():
 
 		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
 		
-		roomsAvailable = 0
-
 		try: # IF Rooms are available
-			roomContainer = self.br.find_element_by_class_name("responsive-flow")
-			roomsList = roomContainer.find_elements_by_xpath("./*")
-			roomsAvailable = len(roomsList)
+			hallsContainer = self.br.find_element_by_class_name("responsive-flow")
+			hallsList = hallsContainer.find_elements_by_xpath("./*")
+			roomsAvailable = True
+		except NoSuchElementException: # Rooms are not available
+			roomsAvailable = False
 			sys.stdout.write(
-				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - {roomsAvailable} ROOM(S) AVAILABLE:\n"
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet\n"
 			)
 			sys.stdout.flush()
-
+		
+		roomsCount = 0
+		if roomsAvailable:
 			uniqueHalls = []
 			roomsData = []
 
-			for room in roomsList: # Get info of each room available
-				hall = room.find_element_by_class_name("title").text
+			for h in range(len(hallsList)): # Get info of each room available
+				hallsContainer = self.br.find_element_by_class_name("responsive-flow")
+				hall = hallsContainer.find_elements_by_xpath("./*")[h]
+				hallName = hall.find_element_by_class_name("title").text
+				uniqueHalls.append(hallName)
 
-				if hall not in uniqueHalls:
-					uniqueHalls.append(hall)
+				sys.stdout.write(f"\rChecking for rooms in {hallName}...")
+				sys.stdout.flush()
 
 				# Go to results info page
-				button = room.find_element_by_class_name("ui-select-action")
+				button = hall.find_element_by_class_name("ui-select-action")
 				self.br.execute_script("arguments[0].click();", button)
 
 				try: # Wait for page to finish loading
@@ -248,61 +254,96 @@ class RoomChecker():
 					WebDriverWait(self.br, self.timeout).until(element_present)
 				except TimeoutException:
 					print(">Loading took too much time!")
-				
-				resContainer = self.br.find_element_by_class_name("results-list")
-				result = resContainer.find_element_by_xpath("./*")
 
-				roomNum = result.find_element_by_class_name("title").text
-				wing = result.find_element_by_class_name("multiline").text.split("\n")[0]
-				capacity = result.find_element_by_class_name("capacity").text.replace("\n", "").replace("\t", "").replace(" ", "")
+				roomsList = self.br.find_elements_by_class_name("item-result")
 
-				print((" " * 19) + f"+ {hall} - {roomNum} - {wing} - {capacity} beds")
+				roomNums = []
+				for r in range(len(roomsList)):
+					room = self.br.find_elements_by_class_name("item-result")[r]
 
-				# Go to room info page
-				infoLink = result.find_element_by_link_text("Show Room Info")
-				self.br.get(infoLink.get_attribute("href"))
+					if "dummy-item-result" in room.get_attribute("class"):
+						continue
 
-				table = self.br.find_element_by_class_name("ui-active-table")
-				tableBody = table.find_element_by_tag_name("tbody")
-				tableRows = tableBody.find_elements_by_xpath("./*")
+					temp = room.find_element_by_class_name("title").text.split("-")
+					roomNum = temp[0] + "-" + temp[1][:3]
 
-				# Get info of each occupant of the room
-				occupants = []
-				for row in tableRows:
-					bed = row.find_element_by_class_name("roomspacedescription").text
-					name = row.find_element_by_class_name("nameweb").text.replace("-","")
-					gender = row.find_element_by_class_name("genderenum").text
-					age = row.find_element_by_class_name("age").text
-					print((" " * 21) + f"> {bed} - {name} - {gender} - {age}y")
-					age = 0 if name == "Vacant" else int(age)
-					occupants.append({
-						"bed": bed,
-						"name": name,
-						"gender": gender,
-						"age": age
+					if roomNum in roomNums:
+						continue
+					else:
+						roomNums.append(roomNum)
+						roomsCount += 1
+						sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
+						sys.stdout.write(f"\r{len(roomNums)} rooms found in in {hallName}...")
+						sys.stdout.flush()
+
+					wing = room.find_element_by_class_name("multiline").text.split("\n")[0]
+					capacity = room.find_element_by_class_name("capacity").text.replace("\n", "").replace("\t", "").replace(" ", "")
+
+					# Go to room info page
+					infoLink = room.find_element_by_link_text("Show Room Info")
+					self.br.get(infoLink.get_attribute("href"))
+
+					table = self.br.find_element_by_class_name("ui-active-table")
+					tableBody = table.find_element_by_tag_name("tbody")
+					tableRows = tableBody.find_elements_by_xpath("./*")
+
+					# Get info of each occupant of the room
+					occupants = []
+					for row in tableRows:
+						bed = row.find_element_by_class_name("roomspacedescription").text
+						name = row.find_element_by_class_name("nameweb").text.replace("-","")
+						gender = row.find_element_by_class_name("genderenum").text
+						age = row.find_element_by_class_name("age").text
+						age = 0 if name == "Vacant" else int(age)
+						occupants.append({
+							"bed": bed,
+							"name": name,
+							"gender": gender,
+							"age": age
+						})
+
+					roomsData.append({
+						"hall": hallName,
+						"wing": wing,
+						"roomNumber": roomNum,
+						"capacity": int(capacity),
+						"ocuppants": occupants
 					})
 
-				roomsData.append({
-					"hall": hall,
-					"wing": wing,
-					"roomNumber": roomNum,
-					"capacity": int(capacity),
-					"ocuppants": occupants
-				})
+					if r < len(roomsList) - 1:
+						self.navigateToPage()
+						hallsContainer = self.br.find_element_by_class_name("responsive-flow")
+						hall = hallsContainer.find_elements_by_xpath("./*")[h]
+						button = hall.find_element_by_class_name("ui-select-action")
+						self.br.execute_script("arguments[0].click();", button)
+
+						try: # Wait for page to finish loading
+							element_present = EC.presence_of_element_located(
+								(By.CLASS_NAME, "results-list")
+							)
+							WebDriverWait(self.br, self.timeout).until(element_present)
+						except TimeoutException:
+							print(">Loading took too much time!")
 
 				self.navigateToPage()
+				
+			sys.stdout.write(
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - {roomsCount} ROOM(S) AVAILABLE:\n"
+				)
+			sys.stdout.flush()
+
+			for room in roomsData:
+				print((" " * 19) + f"+ {room['hall']} - {room['roomNumber']} - {room['wing']} - {room['capacity']} beds")
+
+				for occupant in room['ocuppants']:
+					print((" " * 21) + f"> {occupant['bed']} - {occupant['name']} - {occupant['gender']} - {occupant['age']}y")
 
 			self.postIFTTT(dtChecked, roomsData, uniqueHalls) # Post to IFTTT
 			self.postNotification(dtChecked, roomsData, uniqueHalls)
 			self.logJSON(dtChecked, roomsData) # Save JSON log
 			self.lastCheck = roomsData
-		except NoSuchElementException: # Rooms are not available
-			sys.stdout.write(
-				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet\n"
-			)
-			sys.stdout.flush()
 
-		self.logCSV(dtChecked, roomsAvailable) # Save CSV log
+		self.logCSV(dtChecked, roomsCount) # Save CSV log
 		self.snapshot(dtChecked, html) # Save HTML snapshot
 
 		if self.checkPeriodically:
