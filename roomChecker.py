@@ -85,17 +85,14 @@ class RoomChecker():
 
 				if dt[0] not in log:
 					log[dt[0]] = data[dt[0]]
+				elif dt[1] not in log[dt[0]]:
+					log[dt[0]][dt[1]] = data[dt[0]][dt[1]] 
+				elif dt[2] not in log[dt[0]][dt[1]]:
+					log[dt[0]][dt[1]][dt[2]] = data[dt[0]][dt[1]][dt[2]]
+				elif dt[3] not in log[dt[0]][dt[1]][dt[2]]:
+					log[dt[0]][dt[1]][dt[2]][dt[3]] = data[dt[0]][dt[1]][dt[2]][dt[3]]
 				else:
-					if dt[1] not in log[dt[0]]:
-						log[dt[0]][dt[1]] = data[dt[0]][dt[1]] 
-					else:
-						if dt[2] not in log[dt[0]][dt[1]]:
-							log[dt[0]][dt[1]][dt[2]] = data[dt[0]][dt[1]][dt[2]]
-						else:
-							if dt[3] not in log[dt[0]][dt[1]][dt[2]]:
-								log[dt[0]][dt[1]][dt[2]][dt[3]] = data[dt[0]][dt[1]][dt[2]][dt[3]]
-							else:
-								log[dt[0]][dt[1]][dt[2]][dt[3]][dt[4]] = data[dt[0]][dt[1]][dt[2]][dt[3]][dt[4]]
+					log[dt[0]][dt[1]][dt[2]][dt[3]][dt[4]] = roomsData
 
 			with open(self.jsonFileName, "w") as file:
 				file.write(json.dumps(log))
