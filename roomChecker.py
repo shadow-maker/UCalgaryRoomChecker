@@ -23,6 +23,8 @@ import time
 
 class RoomChecker():
 
+	lastCheck = []
+
 	#
 	# URLS
 	#
@@ -35,6 +37,7 @@ class RoomChecker():
 	#
 
 	iftttPost = True
+	postIfNoChange = False
 	logToCSV = True
 	logToJson = True
 	saveSnapshot = True
@@ -109,11 +112,11 @@ class RoomChecker():
 			file.write(html)
 	
 
-	def postIFTTT(self, dtChecked, roomsAvailable, uniqueHalls):
-		if self.iftttPost and self.iftttKey != "":
+	def postIFTTT(self, dtChecked, roomsData, uniqueHalls):
+		if self.iftttPost and self.iftttKey != "" and (self.lastCheck != roomsData or self.postIfNoChange):
 			requests.post(self.iftttPostURL + self.iftttKey,
 				{
-					"value1": roomsAvailable,
+					"value1": len(roomsData),
 					"value2": ", ".join(uniqueHalls),
 					"value3": dtChecked.strftime("%Y-%m-%d %H:%M")
 				}
@@ -208,20 +211,21 @@ class RoomChecker():
 
 		sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
 		
-		roomsAvailable = []
+		roomsAvailable = 0
 
 		try: # IF Rooms are available
 			roomContainer = self.br.find_element_by_class_name("responsive-flow")
-			roomsAvailable = roomContainer.find_elements_by_xpath("./*")
+			roomsList = roomContainer.find_elements_by_xpath("./*")
+			roomsAvailable = len(roomsList)
 			sys.stdout.write(
-				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - {len(roomsAvailable)} ROOM(S) AVAILABLE:\n"
+				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - {roomsAvailable} ROOM(S) AVAILABLE:\n"
 			)
 			sys.stdout.flush()
 
 			uniqueHalls = []
 			roomsData = []
 
-			for room in roomsAvailable: # Get info of each room available
+			for room in roomsList: # Get info of each room available
 				hall = room.find_element_by_class_name("title").text
 
 				if hall not in uniqueHalls:
@@ -282,15 +286,16 @@ class RoomChecker():
 
 				self.navigateToPage()
 
-			self.postIFTTT(dtChecked, len(roomsAvailable), uniqueHalls) # Post to IFTTT
+			self.postIFTTT(dtChecked, roomsData, uniqueHalls) # Post to IFTTT
 			self.logJSON(dtChecked, roomsData) # Save JSON log
+			self.lastCheck = roomsData
 		except NoSuchElementException: # Rooms are not available
 			sys.stdout.write(
 				f"\r{dtChecked.strftime('%Y-%m-%d %H:%M')} - No rooms available yet\n"
 			)
 			sys.stdout.flush()
 
-		self.logCSV(dtChecked, len(roomsAvailable)) # Save CSV log
+		self.logCSV(dtChecked, roomsAvailable) # Save CSV log
 		self.snapshot(dtChecked, html) # Save HTML snapshot
 
 		if self.checkPeriodically:

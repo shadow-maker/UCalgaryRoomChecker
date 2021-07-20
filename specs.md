@@ -6,6 +6,10 @@
   * Type: `selenium.webdriver`
   * Default: `webdriver.safari.webdriver.WebDriver()`
   * **Selenium webdriver object, responsible for controlling the browser window and performing the webscraping**
+* `lastCheck`
+  * Type: `list`
+  * Default: `[]`
+  * **A list containing the rooms data of the last time rooms were checked**
 
 ### Credentials
 
@@ -36,6 +40,10 @@
   * Type: `bool`
   * Default: `True`
   * **Whether to make a POST to the IFTTT service**
+* `postIfNoChange`
+  * Type: `bool`
+  * Default: `False`
+  * **Whether to make a POST to the IFTTT service if there's no change in the rooms found**
 * `logToCSV`
   * Type: `bool`
   * Default: `True`
