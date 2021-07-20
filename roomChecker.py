@@ -189,11 +189,15 @@ class RoomChecker():
 
 
 	def navigateToPage(self): # Navigate to room change page
-		link = self.br.find_element_by_link_text("Room Change")
-		self.br.get(link.get_attribute("href"))
+		try: # If direct link is available
+			link = self.br.find_element_by_class_name("completedcurrent")
+			self.br.get(link.get_attribute("href"))
+		except NoSuchElementException: # Otherwise
+			link = self.br.find_element_by_link_text("Room Change")
+			self.br.get(link.get_attribute("href"))
 
-		button = self.br.find_element_by_tag_name("button")
-		self.br.execute_script("arguments[0].click();", button)
+			button = self.br.find_element_by_tag_name("button")
+			self.br.execute_script("arguments[0].click();", button)
 		
 		dtChecked = datetime.now()
 
