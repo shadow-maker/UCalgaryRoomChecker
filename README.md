@@ -6,7 +6,7 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 * The script uses your personal credentials to log you into your residence portal via your web browser
 * Navigates to the room change page and detects if rooms are available
 * Prints to the console the available rooms' information, incluiding the general information of the current occupants
-* Is able to make a POST to the [IFTTT](https://ifttt.com/home) service with the general information on the available rooms, so that you can create cool automations like receive a notification everytime a new room has opened up (read (IFTT Integration)[#ifttt-integration])
+* Is able to make a POST to the [IFTTT](https://ifttt.com/home) service with the general information on the available rooms, so that you can create cool automations like receive a notification everytime a new room has opened up (read (IFTT Integration)[https://github.com/shadow-maker/UCalgaryRoomChecker#ifttt-integration])
 * Is able to refresh the page periodically each given ammount of seconds (default is 300) to continue checking for rooms indefinetely
 
 ## Requirements
