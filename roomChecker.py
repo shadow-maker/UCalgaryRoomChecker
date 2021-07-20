@@ -13,6 +13,7 @@ from datetime import datetime
 from math import log10
 import json
 import os
+import platform
 import requests
 import sys
 import time
@@ -36,11 +37,12 @@ class RoomChecker():
 	# BOOLS
 	#
 
-	iftttPost = True
-	postIfNoChange = False
 	logToCSV = True
 	logToJson = True
 	saveSnapshot = True
+	iftttPost = True
+	postIfNoChange = False
+	notifyMac = True
 
 	#
 	# FILE NAMES
@@ -121,6 +123,10 @@ class RoomChecker():
 					"value3": dtChecked.strftime("%Y-%m-%d %H:%M")
 				}
 			)
+	
+	def postNotification(self, dtChecked, roomsData, uniqueHalls):
+		if self.notifyMac and platform.system() == "Darwin" and (self.lastCheck != roomsData or self.postIfNoChange):
+			os.system(f"""osascript -e 'display notification "{len(roomsData)} room(s) available for residence in {", ".join(uniqueHalls)}\nChecked: {dtChecked.strftime("%Y-%m-%d %H:%M")}" with title "ROOM AVAILABLE"'""")
 	
 	#
 	# MAIN FUNCS
@@ -287,6 +293,7 @@ class RoomChecker():
 				self.navigateToPage()
 
 			self.postIFTTT(dtChecked, roomsData, uniqueHalls) # Post to IFTTT
+			self.postNotification(dtChecked, roomsData, uniqueHalls)
 			self.logJSON(dtChecked, roomsData) # Save JSON log
 			self.lastCheck = roomsData
 		except NoSuchElementException: # Rooms are not available

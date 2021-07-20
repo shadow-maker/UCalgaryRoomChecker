@@ -36,14 +36,6 @@
 
 ### Booleans
 
-* `iftttPost`
-  * Type: `bool`
-  * Default: `True`
-  * **Whether to make a POST to the IFTTT service**
-* `postIfNoChange`
-  * Type: `bool`
-  * Default: `False`
-  * **Whether to make a POST to the IFTTT service if there's no change in the rooms found**
 * `logToCSV`
   * Type: `bool`
   * Default: `True`
@@ -60,6 +52,19 @@
   * Type: `bool`
   * Default: `False`
   * **Whether to check for new rooms periodically and indefinetely**
+* `iftttPost`
+  * Type: `bool`
+  * Default: `True`
+  * **Whether to make a POST to the IFTTT service with the general information on the rooms found**
+* `postIfNoChange`
+  * Type: `bool`
+  * Default: `False`
+  * **Whether to make a POST to the IFTTT service and/or Mac notification if there's no change in the rooms found**
+* `notifyMac`
+  * Type: `bool`
+  * Default: `True`
+  * **Whether to post a notification with the general information on the rooms found**
+  * **Only Mac supported**
 
 ### File names
 
@@ -105,8 +110,11 @@
   * Parameters: `dtChecked` (`datetime.datetime`), `html` (`str`)
   * **Creates the necessary directories organized by datetime and creates a html file with snapshot data from a given time**
 * `postIFTTT`
-  * Parameters: `dtChecked` (`datetime.datetime`), `roomsAvailable` (`int`), `uniqueHalls` (`list`)
-  * **Makes a POST request to the `iftttPostURL` with the `iftttKey` with a dictionary containg the `roomsAvailable`, `uniqueHalls` names, and the `dtChecked` as a string**
+  * Parameters: `dtChecked` (`datetime.datetime`), `roomsData` (`int`), `uniqueHalls` (`list`)
+  * **Makes a POST request to the `iftttPostURL` with the `iftttKey` with a dictionary containg the rooms available, `uniqueHalls` names, and the `dtChecked` as a string**
+* `postNotification`
+  * Parameters: `dtChecked` (`datetime.datetime`), `roomsData` (`int`), `uniqueHalls` (`list`)
+  * **Posts a Mac notification with the rooms available, `uniqueHalls` names, and the `dtChecked` as a string**
 
 ### Scraper methods
 
