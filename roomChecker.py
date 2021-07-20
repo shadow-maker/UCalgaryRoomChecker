@@ -133,11 +133,11 @@ class RoomChecker():
 
 		for i in range(width): # Loop width of progress bar
 			for s in range(len(loadStates)): # Loop loading chars
-				timeLeft = (self.sleepInterval - (timePerChar * (i + ((s + 1) / len(loadStates))))) + 0.01
+				timeLeft = (self.sleepInterval - (timePerChar * (i + ((s + 1) / len(loadStates)))))
 
 				# Formar timeLeft so that its always 3 chars long
 				timeDigs = int(log10(timeLeft)) + 1
-				timeFormat = str(round(timeLeft, 1) if timeDigs < 2 else (round(timeLeft) if timeDigs < 4 else 999)).zfill(3)
+				timeFormat = str(round(timeLeft, 1) if timeDigs < 2 else (round(timeLeft) if timeDigs < 4 else 999)).zfill(3)[:3]
 
 				# Output progress bar
 				sys.stdout.write(f"\r[{('-' * i)}{loadStates[s]}{' ' * (width - i - 1)}]{timeFormat}s")
