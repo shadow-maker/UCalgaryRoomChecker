@@ -59,7 +59,7 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 1. Create an [IFTTT](https://ifttt.com/home) account
 2. Visit [https://ifttt.com/maker_webhooks](https://ifttt.com/maker_webhooks) and click on `Documentation`
 3. Copy your IFTTT key and keep it in a safe place, you'll input the key when using the program
-4. Now you can (create a new automation)[https://ifttt.com/create] where the trigger is Webhooks / receive a web request and the event name is `room_available`
+4. Now you can [create a new automation](https://ifttt.com/create) where the trigger is Webhooks / receive a web request and the event name is `room_available`
 5. Now you can add whatever applet you want that will act uppon the web request, where the special "ingredients" are as follows:
 
 ### Ingredients
