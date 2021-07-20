@@ -31,7 +31,6 @@ class RoomChecker():
 	#
 
 	loginURL = "https://cas.ucalgary.ca/cas/?service=https%3a%2f%2fucalgary.starrezhousing.com%2fStarRezPortalX%2fRedirectLogin%2fStarNet.StarRez.AuthProviders.CasSso"
-	errorPage = "https://ucalgary.starrezhousing.com/StarRezPortalX/Page/GetFirstPageWithReturnUrl?processID=22&returnUrl=%2FStarRezPortalX%2F3013DBBA%2F12%2F47%2FHome-Your_Resident_Portal%3FUrlToken%3D7A860693&isPageForContact=False&clearProcessContext=True&hash=003276C2"
 	iftttPostURL = "https://maker.ifttt.com/trigger/room_available/with/key/"
 
 	#
@@ -180,7 +179,6 @@ class RoomChecker():
 			self.br.find_element_by_id("signinbutton").click()
 
 			# Close pop-up
-
 			WebDriverWait(self.br, 20).until(EC.number_of_windows_to_be(2))
 			mainWin = [x for x in self.br.window_handles if x != parentWindow][0]
 			self.br.switch_to.window(mainWin)
@@ -335,6 +333,6 @@ class RoomChecker():
 			self.checkForRooms() # Recursive
 
 
-	def begin(self):
+	def begin(self): # Begins checking for rooms
 		self.logIn()
 		self.checkForRooms()
