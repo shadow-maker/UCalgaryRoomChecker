@@ -54,7 +54,7 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 ## IFTTT Integration
 * RoomChecker is able to make a POST to the [IFTTT](https://ifttt.com/home) service with the general information on the available rooms, so that you can create cool automations like receive a notification everytime a new room has opened up
 
-## How to use
+### How to use
 
 1. Create an [IFTTT](https://ifttt.com/home) account
 2. Visit [https://ifttt.com/maker_webhooks](https://ifttt.com/maker_webhooks) and click on `Documentation`
@@ -62,7 +62,7 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 4. Now you can (create a new automation)[https://ifttt.com/create] where the trigger is Webhooks / receive a web request and the event name is `room_available`
 5. Now you can add whatever applet you want that will act uppon the web request, where the special "ingredients" are as follows:
 
-## Ingredients
+### Ingredients
 
 * When the program makes a POST to the IFTTT service, a dictionary is sent with the message containing the following data:
   * `Value1`: The amount of rooms available
@@ -70,7 +70,7 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
   * `Value3`: The date-time when rooms where checked
 * You can use these values as "ingredients" inside your automation applet
 
-## My recommendation
+### My recommendation
 * This is the applet that I personally use for my IFTTT automation with my cellphone:
   * **Applet name:** "Send a rich notification from the IFTTT app"
   * **Message:** "`Value1` room(s) available for residence in `Value2`. Checked: `Value3`"
