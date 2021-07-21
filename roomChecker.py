@@ -1,14 +1,3 @@
-try:
-	from selenium import webdriver
-	from selenium.webdriver.support.ui import WebDriverWait
-	from selenium.webdriver.support import expected_conditions as EC
-	from selenium.common.exceptions import NoSuchElementException
-	from selenium.webdriver.common.by import By
-	from selenium.common.exceptions import TimeoutException
-except ModuleNotFoundError:
-	print("Required library 'selenium' not found")
-	print("Please run the 'pip install selenium' command")
-
 from datetime import datetime
 from math import log10
 import json
@@ -17,6 +6,16 @@ import platform
 import requests
 import sys
 import time
+
+try:
+	from selenium import webdriver
+	from selenium.webdriver.support.ui import WebDriverWait
+	from selenium.webdriver.support import expected_conditions as EC
+	from selenium.common.exceptions import NoSuchElementException
+	from selenium.webdriver.common.by import By
+	from selenium.common.exceptions import TimeoutException
+except ModuleNotFoundError:
+	sys.exit("ERROR: Required library 'selenium' not found\nPlease run the 'pip install selenium' command")
 
 #
 # UCALGARY ROOM CHECKER
@@ -185,7 +184,8 @@ class RoomChecker():
 			self.br.close()
 			self.br.switch_to.window(self.br.window_handles[0])
 		
-		self.waitForPageLoad("Room Change", By.LINK_TEXT)
+		if not self.waitForPageLoad("Room Change", By.LINK_TEXT):
+			sys.exit()
 
 
 	def navigateToPage(self): # Navigate to room change page
@@ -201,7 +201,8 @@ class RoomChecker():
 		
 		dtChecked = datetime.now()
 
-		self.waitForPageLoad("px_initialfilterstep_page")
+		if not self.waitForPageLoad("px_initialfilterstep_page"):
+			sys.exit()
 		
 		return dtChecked
 	
@@ -227,7 +228,8 @@ class RoomChecker():
 			button = hall.find_element_by_class_name("ui-select-action")
 			self.br.execute_script("arguments[0].click();", button)
 
-			self.waitForPageLoad("results-list")
+			if not self.waitForPageLoad("results-list"):
+				break
 
 			roomItems = len(self.br.find_elements_by_class_name("item-result"))
 
@@ -285,7 +287,8 @@ class RoomChecker():
 					button = hall.find_element_by_class_name("ui-select-action")
 					self.br.execute_script("arguments[0].click();", button)
 
-					self.waitForPageLoad("results-list")
+					if not self.waitForPageLoad("results-list"):
+						break
 			
 			sys.stdout.write("\r" + (" " * os.get_terminal_size().columns))
 			sys.stdout.write(f"\r{(' ' * 19)}+ {len(roomNums)} ROOM(S) AVAILABLE IN {hallName.upper()}:\n")
