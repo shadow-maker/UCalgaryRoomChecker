@@ -47,6 +47,8 @@ class RoomChecker():
 	# FILE NAMES
 	#
 
+	chromedriverName = "chromedriver"
+	geckodriverName = "geckodriver"
 	csvFileName = "log.csv"
 	jsonFileName = "log.json"
 	snapshotDir = "snapshots"
@@ -62,12 +64,34 @@ class RoomChecker():
 	# Init
 	#
 
-	def __init__(self, user, pssw, iftttKey="", checkPeriodically=False):
-		self.br = webdriver.safari.webdriver.WebDriver()
+	def __init__(self, user, pssw, iftttKey="", browser="C", checkPeriodically=False):
 		self.user = user
 		self.pssw = pssw
 		self.iftttKey = iftttKey
 		self.checkPeriodically = checkPeriodically
+		if browser not in ["S", "C", "F"]:
+			sys.exit("ERROR: Driver parameter can only be 'S', 'C' or 'F'")
+		self.browser = browser
+	
+	def initDriver(self):
+		if self.browser == "S":
+			if platform.system() != "Darwin":
+				sys.exit("ERROR: The Safari webdriver only works in MacOS")
+			self.br = webdriver.Safari()
+		elif self.browser == "C":
+			if platform.system() == "Windows" and ".exe" not in self.chromedriverName:
+				self.chromedriverName += ".exe"
+			if not os.path.exists(self.chromedriverName):
+				sys.exit(f"ERROR: The Chrome WebDriver with name '{self.chromedriverName}' does not exist")
+			path = os.path.join(os.getcwd(), self.chromedriverName)
+			self.br = webdriver.Chrome(executable_path=path)
+		elif self.browser == "F":
+			if platform.system() == "Windows" and ".exe" not in self.geckodriverName:
+				self.geckodriverName += ".exe"
+			if not os.path.exists(self.geckodriverName):
+				sys.exit(f"ERROR: The Firefox WebDriver with name '{self.geckodriverName}' does not exist")
+			path = os.path.join(os.getcwd(), self.geckodriverName)
+			self.br = webdriver.Firefox(executable_path=path)
 
 	#
 	# LOG
@@ -104,12 +128,12 @@ class RoomChecker():
 
 	def snapshot(self, dtChecked, html):
 		if self.saveSnapshot:
-			snapDir = f"{self.snapshotDir}/{dtChecked.strftime('%Y-%m-%d')}/{dtChecked.strftime('%H')}"
+			snapDir = os.path.join(self.snapshotDir, dtChecked.strftime('%Y-%m-%d'), dtChecked.strftime('%H'))
 		
 		if not os.path.exists(snapDir):
 			os.makedirs(snapDir)
 
-		with open(snapDir + f"/{dtChecked.strftime('%M')}.html", "w") as file:
+		with open(os.path.join(snapDir, f"{dtChecked.strftime('%M')}.html"), "w") as file:
 			file.write(html)
 	
 
@@ -341,5 +365,6 @@ class RoomChecker():
 
 
 	def begin(self): # Begins checking for rooms
+		self.initDriver()
 		self.logIn()
 		self.checkForRooms()

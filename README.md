@@ -10,7 +10,11 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 * Is able to refresh the page periodically each given ammount of seconds (default is 300) to continue checking for rooms indefinetely
 
 ## Requirements
-* IMPORTANT: Mac Safari is currently the only supported web browser
+* A supported browser: Chrome, Safari, or Firefox
+* A webdriver for your chosen browser:
+  * Safari: You don't need to download any additional webdriver
+  * Chrome: Download the latest webdriver for Chrome from [https://sites.google.com/a/chromium.org/chromedriver/downloads](https://sites.google.com/a/chromium.org/chromedriver/downloads) and save it in the same directory as the Python program with the name `chromedriver`
+  * Firefox: Download the latest webdriver for Firefox from [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases) and save it in the same directory as the Python program with the name `geckodriver`
 * A modern version of Python (tested on 3.8.2)
 * Selenium for python
   * Install via pip: run the `pip install selenium` command in your terminal / command line
@@ -18,15 +22,19 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 ## [Class specifications / documentation](specs.md)
 
 ## How to use
+
+Remember to meet all the [requirements][#requirements] before starting
+
 ### If you have used Python before...
 * The file `roomChecker.py` contains the class `RoomChecker` which performs all the webscraping and contains the needed attributes
 * To create an instance of this class use the following constructor format:
 * `RoomChecker(user, pssw, iftttKey="", checkPeriodically=False)`
 * Where:
-  * `user`: (str) Your UCalgary username
-  * `pssw`: (str) Your UCalgary password
-  * `iftttKey`: (str) Your unique IFTTT webhook key
-  * `checkPeriodically`: (bool) Whether you want the program to check for rooms periodically or not
+  * `user`: (`str`) Your UCalgary username
+  * `pssw`: (`str`) Your UCalgary password
+  * `iftttKey`: (`str`) Your unique IFTTT webhook key
+  * `browser`: (`str`) Your chosen browser, has to be "C" for Chrome, "S" for Safari, or "F" for Firefox
+  * `checkPeriodically`: (`bool`) Whether you want the program to check for rooms periodically or not
 
 ### If you haven't used Python before...
 * Clone this repository or download the `roomChecker.py` file, which contains the `RoomChecker` class
@@ -42,17 +50,18 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
     * Now your inside your interactive interpreter and you should see `>>>` at the begining of each line
     * Run `from roomChecker import RoomChecker` to import the class into the interpreter
     * Create an instance of `RoomChecker` by running the following:
-    * `rc = RoomChecker(user, pssw, iftttKey, checkPeriodically)`
+    * `rc = RoomChecker(user, pssw, iftttKey, browser, checkPeriodically)`
     * Where:
       * `user`: Your UCalgary username in quotes ""
       * `pssw`: Your UCalgary password in quotes ""
       * `iftttKey`: Your unique IFTTT webhook key in quotes "" (not required)
-      * `checkPeriodically`: True or False, Whether you want the program to check for rooms periodically or not (not required, default is False)
+      * `browser`: Your chosen browser `"C"` (Chrome), `"S"` (Safari), or `"F"` (Firefox) (not required, default is `"C"`)
+      * `checkPeriodically`: `True` or `False`, Whether you want the program to check for rooms periodically or not (not required, default is `False`)
     * By now blank browser window should have opened up
     * Run `rc.begin()` to begin checking for rooms
 
 ## IFTTT Integration
-* RoomChecker is able to make a POST to the [IFTTT](https://ifttt.com/home) service with the general information on the available rooms, so that you can create cool automations like receive a notification everytime a new room has opened up
+RoomChecker is able to make a POST to the [IFTTT](https://ifttt.com/home) service with the general information on the available rooms, so that you can create cool automations like receive a notification everytime a new room has opened up
 
 ### How to use
 

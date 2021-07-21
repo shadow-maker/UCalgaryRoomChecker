@@ -68,6 +68,18 @@
 
 ### File names
 
+* `browser`
+  * Type: `str`
+  * Default: 
+  * **The name of the chosen browser, can only be "S" for Safari, "C" for Chrome, or "F" for Firefox**
+* `chromedriverName`
+  * Type: `str`
+  * Default: `"chromedriver"`
+  * **The name of the chromedriver (default will be .exe if OS is Windows)**
+* `geckodriverName`
+  * Type: `str`
+  * Default: `"geckodriver"`
+  * **The name of the geckodriver (default will be .exe if OS is Windows)**
 * `csvFileName`
   * Type: `str`
   * Default: `"log.csv"`
@@ -95,8 +107,11 @@
 ## Methods
 
 * `__init__`
-  * Parameters: `user` (`str`), `pssw` (`str`), `iftttKey=""` (`str`), `checkPeriodically=False` (`bool`)
+  * Parameters: `user` (`str`), `pssw` (`str`), `iftttKey=""` (`str`), `browser="C"` (`str`), `checkPeriodically=False` (`bool`)
   * **Constructs a new RoomChecker instance with the input parameters**
+* `initDriver`
+  * Parameters: 
+  * **Creates a `selenium.webdriver` instance in `br` using the chosen `browser`**
 
 ### Log
 
