@@ -253,6 +253,8 @@ class RoomChecker():
 		sys.stdout.flush()
 
 		for h in range(hallsCount): # Get info of each room available
+			if h > len(self.br.find_elements_by_class_name("responsive-flow>*")) - 1:
+				break
 			hall = self.br.find_elements_by_class_name("responsive-flow>*")[h]
 			hallName = hall.find_element_by_class_name("title").text
 			uniqueHalls.append(hallName)
@@ -268,6 +270,8 @@ class RoomChecker():
 
 			roomNums = []
 			for r in range(roomItems):
+				if r > len(self.br.find_elements_by_class_name("item-result")) - 1:
+					break
 				room = self.br.find_elements_by_class_name("item-result")[r]
 
 				if "dummy-item-result" in room.get_attribute("class"):
