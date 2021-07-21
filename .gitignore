@@ -1,13 +1,16 @@
 # SECRET
 secret.py
 
-# Logs
+# LOGS
 log.csv
 log.json
 snapshots/
 
-# Mac
+# DRIVERS
+chromedriver
+geckodriver
 
+# MAC
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
