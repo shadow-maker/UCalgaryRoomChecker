@@ -12,7 +12,9 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 ## Requirements
 * A supported browser: Chrome, Safari, or Firefox
 * A webdriver for your chosen browser:
-  * Safari: You don't need to download any additional webdriver
+  * Safari: You don't need to download any additional webdriver, but you need to do the following in the browser:
+    * Go to Safari > Preferences > Advanced and click on `Show develop menu on menu bar`
+    * Go to Develop and click on `Allow remote automation`
   * Chrome: Download the latest webdriver for Chrome from [https://sites.google.com/a/chromium.org/chromedriver/downloads](https://sites.google.com/a/chromium.org/chromedriver/downloads) and save it in the same directory as the Python program with the name `chromedriver`
   * Firefox: Download the latest webdriver for Firefox from [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases) and save it in the same directory as the Python program with the name `geckodriver`
 * A modern version of Python (tested on 3.8.2)
