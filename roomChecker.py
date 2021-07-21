@@ -74,24 +74,33 @@ class RoomChecker():
 		self.browser = browser
 	
 	def initDriver(self):
-		if self.browser == "S":
+		if self.browser == "S": # Safari
 			if platform.system() != "Darwin":
 				sys.exit("ERROR: The Safari webdriver only works in MacOS")
-			self.br = webdriver.Safari()
-		elif self.browser == "C":
+
+			self.br = webdriver.Safari() # Instantiate webdriver
+		elif self.browser == "C": # Chrome
+			# Add .exe extension if necessary
 			if platform.system() == "Windows" and ".exe" not in self.chromedriverName:
 				self.chromedriverName += ".exe"
+
+			# Check if webdriver exists
 			if not os.path.exists(self.chromedriverName):
 				sys.exit(f"ERROR: The Chrome WebDriver with name '{self.chromedriverName}' does not exist")
+
 			path = os.path.join(os.getcwd(), self.chromedriverName)
-			self.br = webdriver.Chrome(executable_path=path)
-		elif self.browser == "F":
+			self.br = webdriver.Chrome(executable_path=path) # Instantiate webdriver
+		elif self.browser == "F": # Firefox
+			# Add .exe extension if necessary
 			if platform.system() == "Windows" and ".exe" not in self.geckodriverName:
 				self.geckodriverName += ".exe"
+			
+			# Check if webdriver exists
 			if not os.path.exists(self.geckodriverName):
 				sys.exit(f"ERROR: The Firefox WebDriver with name '{self.geckodriverName}' does not exist")
+
 			path = os.path.join(os.getcwd(), self.geckodriverName)
-			self.br = webdriver.Firefox(executable_path=path)
+			self.br = webdriver.Firefox(executable_path=path) # Instantiate webdriver
 
 	#
 	# LOG
