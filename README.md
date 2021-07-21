@@ -23,7 +23,7 @@ A Python script that scrapes the UCalgary residence portal to check if rooms are
 
 ## How to use
 
-Remember to meet all the [requirements][#requirements] before starting
+Remember to meet all the [requirements](#requirements) before starting
 
 ### If you have used Python before...
 * The file `roomChecker.py` contains the class `RoomChecker` which performs all the webscraping and contains the needed attributes
